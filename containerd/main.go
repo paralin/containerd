@@ -157,10 +157,17 @@ func daemon(context *cli.Context) error {
 	// Split the listen string of the form proto://addr
 	listenSpec := context.String("listen")
 	listenParts := strings.SplitN(listenSpec, "://", 2)
+	var proto, path string
 	if len(listenParts) != 2 {
-		return fmt.Errorf("bad listen address format %s, expected proto://address", listenSpec)
+		// back-compatability
+		// return fmt.Errorf("bad listen address format %s, expected proto://address", listenSpec)
+		proto = "unix"
+		path = listenSpec
+	} else {
+		proto = listenParts[0]
+		path = listenParts[1]
 	}
-	server, err := startServer(listenParts[0], listenParts[1], sv)
+	server, err := startServer(proto, path, sv)
 	if err != nil {
 		return err
 	}
